@@ -45,8 +45,15 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
 
   const thresholdedTokens: Token[] = useMemo(() => {
     return tokens.map(token => {
-      if (token.classification === 'core' || token.classification === 'unsafe') {
+      // Only preserve 'unsafe' classification - everything else gets threshold applied
+      if (token.classification === 'unsafe') {
         return token;
+      }
+
+      // Apply threshold to all tokens with USD value (including those backend marked as 'core')
+      // But respect asset_class='core' policy if set
+      if (token.assetClass === 'core') {
+        return { ...token, classification: 'core' };
       }
 
       if (token.balanceUsd > 0) {
@@ -56,6 +63,8 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
         };
       }
 
+      // Unpriced tokens: preserve original backend classification
+      // (can't apply threshold without a price)
       return token;
     });
   }, [tokens, dustThreshold]);
