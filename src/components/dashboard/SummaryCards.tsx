@@ -21,7 +21,7 @@ export function SummaryCards({ metrics, dustThreshold, onDustThresholdChange }: 
     {
       label: 'TOTAL BALANCE',
       value: metrics.totalBalanceUsd,
-      sub: `${metrics.positions.core + metrics.positions.recoverable + metrics.positions.dust + metrics.positions.unsafe} tokens`,
+      sub: `${metrics.positions.recoverable + metrics.positions.dust + metrics.positions.unsafe} tokens`,
       accent: false,
       prefix: '$',
       decimals: 2,

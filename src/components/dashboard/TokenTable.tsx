@@ -48,8 +48,7 @@ interface TokenTableProps {
 }
 
 export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll, onClearAll }: TokenTableProps) {
-  const [filter, setFilter] = useState<TokenClassification | 'all' | 'forgotten'>('all');
-  const [assetClassFilter, setAssetClassFilter] = useState<'all' | 'core' | 'non_core'>('all');
+  const [filter, setFilter] = useState<TokenClassification | 'all'>('all');
 
   const explorerBaseByChain: Record<string, string> = {
     ethereum: 'https://etherscan.io/token/',
@@ -73,53 +72,32 @@ export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll
     return base ? `${base}${contract}` : null;
   };
 
-  const isForgotten = (t: TokenPosition) =>
-    t.classification !== 'core' &&
-    t.balanceUsd > 1 &&
-    !!t.lastTransferredAt &&
-    isDormant(t.lastTransferredAt);
-
   const counts: Record<string, number> = {
     all: tokens.length,
-    core: tokens.filter(t => t.classification === 'core').length,
     recoverable: tokens.filter(t => t.classification === 'recoverable').length,
     dust: tokens.filter(t => t.classification === 'dust').length,
-    forgotten: tokens.filter(isForgotten).length,
     unsafe: tokens.filter(t => t.classification === 'unsafe').length,
   };
 
-  const filteredByClass = (() => {
+  const filtered = (() => {
     if (filter === 'all') return tokens;
-    if (filter === 'forgotten') return tokens.filter(isForgotten);
     return tokens.filter(t => t.classification === filter);
   })();
-  const filtered = assetClassFilter === 'all'
-    ? filteredByClass
-    : filteredByClass.filter(t => (t.assetClass || 'non_core') === assetClassFilter);
 
-  const filters: { key: TokenClassification | 'all' | 'forgotten'; label: string }[] = [
+  const filters: { key: TokenClassification | 'all'; label: string }[] = [
     { key: 'all', label: 'All' },
-    { key: 'core', label: 'Core' },
     { key: 'recoverable', label: 'Recoverable' },
     { key: 'dust', label: 'Dust' },
-    { key: 'forgotten', label: 'Forgotten' },
     { key: 'unsafe', label: 'Unsafe' },
   ];
 
-  const classificationHelp: Record<TokenClassification | 'all' | 'forgotten', string> = {
+  const classificationHelp: Record<TokenClassification | 'all', string> = {
     all: 'All tokens across classifications.',
-    core: 'Core assets are strategic holdings and not auto-liquidated.',
-    recoverable: 'Recoverable tokens are eligible for managed liquidation.',
-    dust: 'Dust tokens are small balances that can be batched.',
-    forgotten: 'Dormant 12+ months with value over $1. Worth consolidating before they lose more value.',
+    recoverable: 'Recoverable tokens are eligible for consolidation.',
+    dust: 'Dust tokens are below your threshold.',
     unsafe: 'Unsafe tokens are locked from action due to risk or low liquidity.',
+    core: 'Not used - threshold is the only classifier.',
   };
-
-  const assetClassFilters: { key: 'all' | 'core' | 'non_core'; label: string; help: string }[] = [
-    { key: 'all', label: 'All', help: 'Show all assets regardless of policy classification.' },
-    { key: 'core', label: 'Core', help: 'Core assets are strategic holdings and never auto-liquidated.' },
-    { key: 'non_core', label: 'Non-core', help: 'Non-core assets are eligible for managed liquidation.' },
-  ];
 
   const dustTokens = tokens.filter(t => t.classification === 'dust');
   const dustValue = dustTokens.reduce((sum, t) => sum + t.balanceUsd, 0);
@@ -146,23 +124,6 @@ export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll
           </span>{' '}
           <span style={{ color: 'var(--text-secondary)' }}>
             Batching makes gas cost negligible—even $1 gas for $20 dust nets +$19.
-          </span>
-        </div>
-      )}
-
-      {filter === 'forgotten' && counts.forgotten > 0 && (
-        <div
-          className="rounded-[8px] p-4 mb-4 text-[12px] leading-[1.5]"
-          style={{
-            background: 'var(--elevated)',
-            border: '1px solid var(--accent)',
-          }}
-        >
-          <span style={{ color: 'var(--accent)' }}>
-            <strong>{counts.forgotten} forgotten positions</strong> found.
-          </span>{' '}
-          <span style={{ color: 'var(--text-secondary)' }}>
-            These tokens have been dormant for over a year and are worth consolidating before they lose more value.
           </span>
         </div>
       )}
@@ -296,18 +257,6 @@ export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll
                     </a>
                   ) : (
                     token.symbol
-                  )}
-                  {token.assetClass === 'core' && (
-                    <span 
-                      className="text-[8px] px-1 py-0.5 rounded uppercase font-semibold leading-none"
-                      style={{ 
-                        background: 'var(--accent)', 
-                        color: 'var(--bg)',
-                      }}
-                      title="Core asset - strategic holding, never auto-liquidated"
-                    >
-                      CORE
-                    </span>
                   )}
                 </div>
               </div>

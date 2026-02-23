@@ -50,12 +50,8 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
         return token;
       }
 
-      // Apply threshold to all tokens with USD value (including those backend marked as 'core')
-      // But respect asset_class='core' policy if set
-      if (token.assetClass === 'core') {
-        return { ...token, classification: 'core' };
-      }
-
+      // Apply threshold to ALL tokens with USD value
+      // No special treatment - threshold is the only classifier
       if (token.balanceUsd > 0) {
         return {
           ...token,
@@ -154,7 +150,7 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
       alertCount: scan?.alert_count || 0,
       recoverableUnpricedCount: unpricedRecoverableCount,
       positions: {
-        core: thresholdedTokens.filter(t => t.classification === 'core').length,
+        core: 0, // Not used - threshold is the only classifier
         recoverable: recoverableTokens.length,
         dust: thresholdedTokens.filter(t => t.classification === 'dust').length,
         unsafe: thresholdedTokens.filter(t => t.classification === 'unsafe').length,
