@@ -189,7 +189,7 @@ export function Deposit({ walletAddress, onNavigate, onSwitchWallet, onDisconnec
                               ${token.balanceUsd.toLocaleString()}
                             </p>
                             <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
-                              {token.classification === 'dust' ? 'Dust' : 'Recoverable'}
+                              {token.classification === 'dust' ? 'Dust' : 'Position'}
                             </p>
                           </div>
                         </div>

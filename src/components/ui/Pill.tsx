@@ -10,10 +10,10 @@ const pillStyles: Record<TokenClassification, { label: string; className: string
     className: 'bg-[var(--elevated)] border-[var(--border)] text-[var(--text-tertiary)]',
     help: 'Core assets are strategic holdings and not auto-liquidated.',
   },
-  recoverable: {
-    label: 'RECOVERABLE',
+  positions: {
+    label: 'POSITIONS',
     className: 'bg-[var(--accent-dim)] border-[var(--accent-border)] text-[var(--accent)]',
-    help: 'Recoverable assets are eligible for managed liquidation.',
+    help: 'Positions are balances at or above your threshold.',
   },
   dust: {
     label: 'DUST',

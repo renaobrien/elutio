@@ -76,7 +76,7 @@ export function Landing({ onConnectWallet, onViewExample }: LandingProps) {
               $<CountUp end={treasuryStats} duration={1200} />
             </span>
             <br />
-            in recoverable value is sitting idle across Web3 wallets.
+            in active positions is sitting idle across Web3 wallets.
           </div>
 
           <div className="mb-3 text-[18px] font-serif" style={{ color: 'var(--text)' }}>

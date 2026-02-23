@@ -10,7 +10,7 @@ export interface ScanResult {
   scanId: string;
   metrics: {
     totalBalanceUsd: number;
-    recoverableUsd: number;
+    positionsUsd: number;
     hygieneScore: number;
     tokensCount: number;
   };
@@ -23,7 +23,7 @@ export interface Token {
   contract_address: string;
   balance: string;
   balance_usd: number;
-  classification: 'core' | 'recoverable' | 'dust' | 'unsafe';
+  classification: 'core' | 'positions' | 'dust' | 'unsafe';
   price_usd: number;
   chain: string;
   has_unlimited_approval: boolean;
@@ -37,7 +37,7 @@ export interface WalletScan {
   wallet_address: string;
   scanned_at: string;
   total_balance_usd: number;
-  recoverable_usd: number;
+  positions_usd: number;
   hygiene_score: number;
   alert_count: number;
 }

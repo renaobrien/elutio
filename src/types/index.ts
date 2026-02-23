@@ -1,25 +1,25 @@
 export interface WalletMetrics {
   totalBalanceUsd: number;
-  recoverableUsd: number;
+  positionsUsd: number;
   dustUsd?: number;
   manualCleanupCostUsd: number;
   hygieneScore: number;
   opportunityCostUsd: number;
   alertCount: number;
-  recoverableUnpricedCount: number;
+  positionsUnpricedCount: number;
   unpricedCount: number;
-  unpricedRecoverableCount: number;
+  unpricedPositionsCount: number;
   unpricedDustCount: number;
   dormantCount: number;
   positions: {
     core: number;
-    recoverable: number;
+    positions: number;
     dust: number;
     unsafe: number;
   };
 }
 
-export type TokenClassification = 'core' | 'recoverable' | 'dust' | 'unsafe';
+export type TokenClassification = 'core' | 'positions' | 'dust' | 'unsafe';
 export type AssetClass = 'core' | 'non_core';
 
 export interface TokenPosition {

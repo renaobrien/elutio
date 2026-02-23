@@ -3,13 +3,13 @@ import { HelpCircle } from 'lucide-react';
 
 interface OpportunityCostProps {
   dustPrincipalUsd: number;
-  recoverablePrincipalUsd: number;
+  positionsPrincipalUsd: number;
   potentialEarningsUsd: number;
   unpricedCount?: number;
   dormantCount?: number;
 }
 
-export function OpportunityCost({ dustPrincipalUsd, recoverablePrincipalUsd, potentialEarningsUsd, unpricedCount = 0, dormantCount = 0 }: OpportunityCostProps) {
+export function OpportunityCost({ dustPrincipalUsd, positionsPrincipalUsd, potentialEarningsUsd, unpricedCount = 0, dormantCount = 0 }: OpportunityCostProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
@@ -42,9 +42,7 @@ export function OpportunityCost({ dustPrincipalUsd, recoverablePrincipalUsd, pot
                 color: 'var(--text-secondary)',
               }}
             >
-              {unpricedCount > 0 || dormantCount > 0
-                ? `Dust ($${currentValue.toFixed(2)}) + ${unpricedCount} unpriced tokens${dormantCount > 0 ? ` (${dormantCount} dormant 12+ months)` : ''}. Actual value unknown but potentially significant.`
-                : 'Estimated value lost due to token dust and unused positions over the past 90 days'}
+              Principal view: dust + positions balances. Potential earnings is estimated yearly yield at 7% APY on transferable principal.{unpricedCount > 0 ? ` Unpriced assets (${unpricedCount}) are shown with $1 floor estimate.` : ''}
             </div>
           )}
         </div>
@@ -62,10 +60,10 @@ export function OpportunityCost({ dustPrincipalUsd, recoverablePrincipalUsd, pot
 
         <div>
           <div className="text-[11px] mb-[3px]" style={{ color: 'var(--text-secondary)' }}>
-            Recoverable principal
+            Positions principal
           </div>
           <div className="text-[18px] font-mono font-medium" style={{ color: 'var(--text)' }}>
-            ${recoverablePrincipalUsd.toLocaleString()}
+            ${positionsPrincipalUsd.toLocaleString()}
           </div>
         </div>
 

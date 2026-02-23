@@ -14,14 +14,14 @@ export function SummaryCards({ metrics, dustThreshold, onDustThresholdChange }: 
   const [hoveredInfo, setHoveredInfo] = useState<string | null>(null);
   const dustUsd = metrics.dustUsd || 0;
   const dustCount = metrics.positions.dust;
-  const recoverableUsd = metrics.recoverableUsd;
-  const recoverableCount = metrics.positions.recoverable;
+  const positionsUsd = metrics.positionsUsd;
+  const positionsCount = metrics.positions.positions;
   
   const cards = [
     {
       label: 'TOTAL BALANCE',
       value: metrics.totalBalanceUsd,
-      sub: `${metrics.positions.recoverable + metrics.positions.dust + metrics.positions.unsafe} tokens`,
+      sub: `${metrics.positions.positions + metrics.positions.dust + metrics.positions.unsafe} tokens`,
       accent: false,
       prefix: '$',
       decimals: 2,
@@ -40,22 +40,22 @@ export function SummaryCards({ metrics, dustThreshold, onDustThresholdChange }: 
       onThresholdChange: onDustThresholdChange,
     },
     {
-      label: 'RECOVERABLE',
-      value: recoverableUsd,
+      label: 'POSITIONS',
+      value: positionsUsd,
       sub: (() => {
-        const pricedCount = recoverableCount - (metrics.recoverableUnpricedCount || 0);
-        if (recoverableUsd > 0 && metrics.recoverableUnpricedCount > 0) {
-          return `${pricedCount} priced + ${metrics.recoverableUnpricedCount} unpriced`;
+        const pricedCount = positionsCount - (metrics.positionsUnpricedCount || 0);
+        if (positionsUsd > 0 && metrics.positionsUnpricedCount > 0) {
+          return `${pricedCount} priced + ${metrics.positionsUnpricedCount} unpriced`;
         }
-        if (recoverableUsd === 0 && metrics.recoverableUnpricedCount > 0) {
-          return `${metrics.recoverableUnpricedCount} unpriced positions`;
+        if (positionsUsd === 0 && metrics.positionsUnpricedCount > 0) {
+          return `${metrics.positionsUnpricedCount} unpriced positions`;
         }
-        return `${recoverableCount} positions`;
+        return `${positionsCount} positions`;
       })(),
       accent: false,
       prefix: '$',
       decimals: 2,
-      info: 'Recoverable principal includes non-core balances at or above the dust threshold. This is principal, not yield.',
+      info: 'Positions are balances at or above your dust threshold.',
     },
     {
       label: 'POTENTIAL EARNINGS',

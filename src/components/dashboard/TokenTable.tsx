@@ -74,7 +74,7 @@ export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll
 
   const counts: Record<string, number> = {
     all: tokens.length,
-    recoverable: tokens.filter(t => t.classification === 'recoverable').length,
+    positions: tokens.filter(t => t.classification === 'positions').length,
     dust: tokens.filter(t => t.classification === 'dust').length,
     unsafe: tokens.filter(t => t.classification === 'unsafe').length,
   };
@@ -86,14 +86,14 @@ export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll
 
   const filters: { key: TokenClassification | 'all'; label: string }[] = [
     { key: 'all', label: 'All' },
-    { key: 'recoverable', label: 'Recoverable' },
+    { key: 'positions', label: 'Positions' },
     { key: 'dust', label: 'Dust' },
     { key: 'unsafe', label: 'Unsafe' },
   ];
 
   const classificationHelp: Record<TokenClassification | 'all', string> = {
     all: 'All tokens across classifications.',
-    recoverable: 'Recoverable tokens are eligible for consolidation.',
+    positions: 'Positions are balances at or above your threshold.',
     dust: 'Dust tokens are below your threshold.',
     unsafe: 'Unsafe tokens are locked from action due to risk or low liquidity.',
     core: 'Not used - threshold is the only classifier.',
@@ -105,7 +105,7 @@ export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll
     .map(token => tokens.indexOf(token))
     .filter(index => {
       const t = tokens[index];
-      return t && (t.classification === 'recoverable' || t.classification === 'dust');
+      return t && (t.classification === 'positions' || t.classification === 'dust');
     });
   const allSelected = selectableIndices.length > 0 && selectableIndices.every(i => selectedIds.has(i));
 
@@ -178,7 +178,7 @@ export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll
                   onClearAll(selectableIndices);
                 }
               }}
-              title="Select all recoverable + dust"
+              title="Select all positions + dust"
             />
             <div
               className="absolute bottom-full mb-2 p-2 rounded-[4px] text-[9px] w-32 z-10 shadow-lg text-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
@@ -188,7 +188,7 @@ export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll
                 color: 'var(--text-secondary)',
               }}
             >
-              Select all recoverable + dust
+              Select all positions + dust
             </div>
           </div>
           <div>Token</div>
@@ -211,7 +211,7 @@ export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll
 
         {filtered.map((token, i) => {
           const globalIdx = tokens.indexOf(token);
-          const canCheck = token.classification === 'recoverable' || token.classification === 'dust';
+          const canCheck = token.classification === 'positions' || token.classification === 'dust';
 
           return (
             <div

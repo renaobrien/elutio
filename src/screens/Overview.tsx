@@ -55,7 +55,7 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
       if (token.balanceUsd > 0) {
         return {
           ...token,
-          classification: token.balanceUsd < dustThreshold ? 'dust' : 'recoverable',
+          classification: token.balanceUsd < dustThreshold ? 'dust' : 'positions',
         };
       }
 
@@ -69,18 +69,18 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
     // Calculate from tokens if scan data is missing or incomplete
     if (!thresholdedTokens || thresholdedTokens.length === 0) return {
       totalBalanceUsd: 0,
-      recoverableUsd: 0,
+      positionsUsd: 0,
       dustUsd: 0,
       manualCleanupCostUsd: 0,
       hygieneScore: 0,
       opportunityCostUsd: 0,
       alertCount: 0,
-      recoverableUnpricedCount: 0,
+      positionsUnpricedCount: 0,
       unpricedCount: 0,
-      unpricedRecoverableCount: 0,
+      unpricedPositionsCount: 0,
       unpricedDustCount: 0,
       dormantCount: 0,
-      positions: { core: 0, recoverable: 0, dust: 0, unsafe: 0 },
+      positions: { core: 0, positions: 0, dust: 0, unsafe: 0 },
     };
 
     // === STEP 1: Separate by Price Status ===
@@ -94,23 +94,23 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
     const dustTokens = pricedTokens.filter(t => t.classification === 'dust');
     const dustUsd = dustTokens.reduce((sum, t) => sum + Number(t.balanceUsd), 0);
 
-    // === STEP 4: Recoverable (Priced Only) ===
-    const recoverableTokens = thresholdedTokens.filter(t => t.classification === 'recoverable');
-    const pricedRecoverable = recoverableTokens.filter(t => 
+    // === STEP 4: Positions (Priced Only) ===
+    const positionsTokens = thresholdedTokens.filter(t => t.classification === 'positions');
+    const pricedPositions = positionsTokens.filter(t => 
       t.balanceUsd !== null && 
       t.balanceUsd !== undefined && 
       Number(t.balanceUsd) > 0
     );
-    const unpricedRecoverable = recoverableTokens.filter(t => 
+    const unpricedPositions = positionsTokens.filter(t => 
       t.balanceUsd === null || 
       t.balanceUsd === undefined ||
       Number(t.balanceUsd) === 0
     );
     
-    const recoverableUsd = pricedRecoverable.reduce((sum, t) => sum + Number(t.balanceUsd), 0);
+    const positionsUsd = pricedPositions.reduce((sum, t) => sum + Number(t.balanceUsd), 0);
 
     // === STEP 5: Unpriced Token Counts ===
-    const unpricedRecoverableCount = unpricedRecoverable.length;
+    const unpricedPositionsCount = unpricedPositions.length;
     const unpricedDustCount = unpricedTokens.filter(t => t.classification === 'dust').length;
 
     // === STEP 6: Dormancy Analysis ===
@@ -124,11 +124,11 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
     const dormantCount = dormantTokens.length;
 
     // === STEP 7: Opportunity Cost Calculation ===
-    // Base: All priced dust + recoverable
-    const pricedTransferable = dustUsd + recoverableUsd;
+    // Base: All priced dust + positions
+    const pricedTransferable = dustUsd + positionsUsd;
 
     // Add floor value for unpriced tokens ($1.00 per token conservative estimate)
-    const unpricedFloorValue = (unpricedRecoverableCount + unpricedDustCount) * 1.0;
+    const unpricedFloorValue = (unpricedPositionsCount + unpricedDustCount) * 1.0;
 
     // Total transferable value (for 7% yield calculation)
     const totalTransferableUsd = pricedTransferable + unpricedFloorValue;
@@ -138,20 +138,20 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
 
     return {
       totalBalanceUsd,
-      recoverableUsd,
+      positionsUsd,
       dustUsd,
       unpricedCount: unpricedTokens.length,
-      unpricedRecoverableCount,
+      unpricedPositionsCount,
       unpricedDustCount,
       dormantCount,
       opportunityCostUsd,
       manualCleanupCostUsd: 1247,
       hygieneScore: scan?.hygiene_score || 100,
       alertCount: scan?.alert_count || 0,
-      recoverableUnpricedCount: unpricedRecoverableCount,
+      positionsUnpricedCount: unpricedPositionsCount,
       positions: {
         core: 0, // Not used - threshold is the only classifier
-        recoverable: recoverableTokens.length,
+        positions: positionsTokens.length,
         dust: thresholdedTokens.filter(t => t.classification === 'dust').length,
         unsafe: thresholdedTokens.filter(t => t.classification === 'unsafe').length,
       },
@@ -165,7 +165,7 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
       new Set(
         thresholdedTokens
           .map((token, i) => ({ token, i }))
-          .filter(({ token }) => token.classification === 'recoverable' || token.classification === 'dust')
+          .filter(({ token }) => token.classification === 'positions' || token.classification === 'dust')
           .map(({ i }) => i)
       )
     );
@@ -197,13 +197,13 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
 
   const selectedTokens = Array.from(selectedIds)
     .map(i => thresholdedTokens[i])
-    .filter(token => token && (token.classification === 'recoverable' || token.classification === 'dust'));
+    .filter(token => token && (token.classification === 'positions' || token.classification === 'dust'));
 
   const selectedValue = selectedTokens.reduce((sum, token) => sum + token.balanceUsd, 0);
 
   const handleShare = () => {
     if (!walletAddress) return;
-    const text = `Check out what Elutio found in my wallet: $${Math.floor(metrics.recoverableUsd).toLocaleString()} in recoverable assets across ${metrics.positions.recoverable} positions.`;
+    const text = `Check out what Elutio found in my wallet: $${Math.floor(metrics.positionsUsd).toLocaleString()} in positions across ${metrics.positions.positions} assets.`;
     const url = `${window.location.origin}?wallet=${walletAddress}`;
     
     // Try native share first
@@ -277,7 +277,7 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
 
           <OpportunityCost
             dustPrincipalUsd={metrics.dustUsd || 0}
-            recoverablePrincipalUsd={metrics.recoverableUsd + (metrics.unpricedCount * 1.0)}
+            positionsPrincipalUsd={metrics.positionsUsd + (metrics.unpricedCount * 1.0)}
             potentialEarningsUsd={metrics.opportunityCostUsd}
             unpricedCount={metrics.unpricedCount}
             dormantCount={metrics.dormantCount}

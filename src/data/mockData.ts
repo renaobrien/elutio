@@ -7,10 +7,10 @@ export const MOCK_TOKENS: TokenPosition[] = [
   { symbol: 'UNI', chain: 'Ethereum', balance: '9,234', balanceUsd: 87000, classification: 'core', liquidityUsd: 120000000, contractAddress: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984' },
   { symbol: 'AAVE', chain: 'Ethereum', balance: '521', balanceUsd: 68000, classification: 'core', liquidityUsd: 85000000, contractAddress: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9' },
 
-  { symbol: 'USDT', chain: 'Ethereum', balance: '45,000', balanceUsd: 45000, classification: 'recoverable', liquidityUsd: 900000000, contractAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
-  { symbol: 'DAI', chain: 'Ethereum', balance: '28,500', balanceUsd: 28500, classification: 'recoverable', liquidityUsd: 450000000, contractAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F' },
-  { symbol: 'WBTC', chain: 'Ethereum', balance: '0.75', balanceUsd: 31200, classification: 'recoverable', liquidityUsd: 250000000, contractAddress: '0x2260FAC5E5542a773Aa44fBCfeDd86b8033ceF1e' },
-  { symbol: 'FRAX', chain: 'Ethereum', balance: '15,000', balanceUsd: 15000, classification: 'recoverable', liquidityUsd: 85000000, contractAddress: '0x853d955aCEf822Db058eb8505911ED77F175b999' },
+  { symbol: 'USDT', chain: 'Ethereum', balance: '45,000', balanceUsd: 45000, classification: 'positions', liquidityUsd: 900000000, contractAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
+  { symbol: 'DAI', chain: 'Ethereum', balance: '28,500', balanceUsd: 28500, classification: 'positions', liquidityUsd: 450000000, contractAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F' },
+  { symbol: 'WBTC', chain: 'Ethereum', balance: '0.75', balanceUsd: 31200, classification: 'positions', liquidityUsd: 250000000, contractAddress: '0x2260FAC5E5542a773Aa44fBCfeDd86b8033ceF1e' },
+  { symbol: 'FRAX', chain: 'Ethereum', balance: '15,000', balanceUsd: 15000, classification: 'positions', liquidityUsd: 85000000, contractAddress: '0x853d955aCEf822Db058eb8505911ED77F175b999' },
 
   { symbol: 'GRT', chain: 'Ethereum', balance: '14,200', balanceUsd: 4623, classification: 'dust', liquidityUsd: 45000000, contractAddress: '0xc944E90C64B2c07662A292be6244BDf05Cda44a7' },
   { symbol: 'SAFE', chain: 'Ethereum', balance: '890', balanceUsd: 3487, classification: 'dust', liquidityUsd: 8000000, contractAddress: '0x5aFE3855358E112B5647B952709E6165e1c1eEEe' },
@@ -60,7 +60,7 @@ export const MOCK_TOKENS: TokenPosition[] = [
 
 export const MOCK_METRICS: WalletMetrics = {
   totalBalanceUsd: MOCK_TOKENS.reduce((sum, token) => sum + token.balanceUsd, 0),
-  recoverableUsd: MOCK_TOKENS.filter(t => t.classification === 'recoverable').reduce((sum, token) => sum + token.balanceUsd, 0),
+  positionsUsd: MOCK_TOKENS.filter(t => t.classification === 'positions').reduce((sum, token) => sum + token.balanceUsd, 0),
   dustUsd: MOCK_TOKENS.filter(t => t.classification === 'dust').reduce((sum, token) => sum + token.balanceUsd, 0),
   manualCleanupCostUsd: 1247,
   hygieneScore: 72,
@@ -68,7 +68,7 @@ export const MOCK_METRICS: WalletMetrics = {
   alertCount: 3,
   positions: {
     core: MOCK_TOKENS.filter(t => t.classification === 'core').length,
-    recoverable: MOCK_TOKENS.filter(t => t.classification === 'recoverable').length,
+    positions: MOCK_TOKENS.filter(t => t.classification === 'positions').length,
     dust: MOCK_TOKENS.filter(t => t.classification === 'dust').length,
     unsafe: MOCK_TOKENS.filter(t => t.classification === 'unsafe').length,
   },

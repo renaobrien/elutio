@@ -81,7 +81,7 @@ export function Settings({ walletAddress, onNavigate, onSwitchWallet, onDisconne
                 Total balance: <span style={{ color: 'var(--text)' }}>{scan ? `$${Number(scan.total_balance_usd).toLocaleString()}` : '—'}</span>
               </div>
               <div className="text-[12px] mb-2" style={{ color: 'var(--text-secondary)' }}>
-                Recoverable: <span style={{ color: 'var(--text)' }}>{scan ? `$${Number(scan.recoverable_usd).toLocaleString()}` : '—'}</span>
+                Positions: <span style={{ color: 'var(--text)' }}>{scan ? `$${Number(scan.positions_usd || scan.recoverable_usd || 0).toLocaleString()}` : '—'}</span>
               </div>
               <div className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
                 Hygiene score: <span style={{ color: 'var(--text)' }}>{scan ? scan.hygiene_score : '—'}</span>
