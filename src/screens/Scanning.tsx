@@ -6,6 +6,7 @@ interface ScanningProps {
   walletAddress: string;
   onComplete: (scanId: string) => void;
   onWalletChange?: (address: string) => void;
+  autoStart?: boolean;
 }
 
 const SAMPLE_WALLETS = [
@@ -16,13 +17,14 @@ const SAMPLE_WALLETS = [
   { id: 'arb', name: 'Arbitrum DAO', address: '0x912CE59144191C1204E64559FE8253a0e49E6548' },
 ];
 
-export function Scanning({ walletAddress, onComplete, onWalletChange }: ScanningProps) {
+export function Scanning({ walletAddress, onComplete, onWalletChange, autoStart = false }: ScanningProps) {
   const [progress, setProgress] = useState(0);
   const [tokensFound, setTokensFound] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [scanId, setScanId] = useState<string | null>(null);
   const [selectedWallet, setSelectedWallet] = useState<string>(walletAddress);
-  const [isScanning, setIsScanning] = useState(false);
+  const [isScanning, setIsScanning] = useState(autoStart);
+  const [showWalletSelector] = useState(!autoStart); // Hide selector when autoStart is true
 
   useEffect(() => {
     if (!isScanning) return;
@@ -37,6 +39,11 @@ export function Scanning({ walletAddress, onComplete, onWalletChange }: Scanning
       const p = Math.min(elapsed / totalDuration, 1);
 
       setProgress(p * 100);
+      
+      // Simulate token discovery during scan (removed when real count arrives)
+      if (tokensFound === 0) {
+        setTokensFound(Math.floor(p * 104)); // Estimate based on Gitcoin wallet
+      }
 
       if (p < 1) {
         requestAnimationFrame(animate);
@@ -49,7 +56,15 @@ export function Scanning({ walletAddress, onComplete, onWalletChange }: Scanning
       .then(result => {
         if (!mounted) return;
         setScanId(result.scanId);
-        setTokensFound(result.metrics.tokensCount);
+        // Robust tokensCount extraction - check all possible naming conventions
+        const count =
+          result?.metrics?.tokensCount ??
+          result?.metrics?.tokens_count ??
+          result?.tokensCount ??
+          result?.tokens_count ??
+          result?.tokens?.length ??
+          0;
+        setTokensFound(count);
 
         const elapsed = Date.now() - startTime;
         const remaining = Math.max(0, totalDuration - elapsed);
@@ -106,7 +121,7 @@ export function Scanning({ walletAddress, onComplete, onWalletChange }: Scanning
           {isScanning ? `Scanning ${selectedWallet.slice(0, 6)}...${selectedWallet.slice(-4)}` : 'Select a wallet to scan'}
         </div>
 
-        {!scanId && (
+        {!scanId && showWalletSelector && (
           <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
             {[
               { id: 'connected', name: 'Connected Wallet', address: walletAddress },
@@ -131,7 +146,7 @@ export function Scanning({ walletAddress, onComplete, onWalletChange }: Scanning
           </div>
         )}
 
-        {!isScanning && !scanId && (
+        {!isScanning && !scanId && showWalletSelector && (
           <button
             onClick={() => {
               setError(null);

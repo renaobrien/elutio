@@ -1,6 +1,43 @@
 import { useState } from 'react';
 import { TokenPosition, TokenClassification } from '../../types';
 import { Pill } from '../ui/Pill';
+import { isDormant } from '../../utils/dormancy';
+
+const CHAIN_COLORS: Record<string, string> = {
+  ethereum: '#627EEA',
+  polygon: '#8247E5',
+  arbitrum: '#28A0F0',
+  optimism: '#FF0420',
+  base: '#0052FF',
+  avalanche: '#E84142',
+  bnb: '#F3BA2F',
+  celo: '#FBCC5C',
+  worldchain: '#000000',
+  sei: '#E85858',
+  unichain: '#FF007A',
+  solana: '#14F195',
+  bitcoin: '#F7931A',
+};
+
+const ChainIcon = ({ chain }: { chain: string }) => {
+  const color = CHAIN_COLORS[chain.toLowerCase()] || '#999';
+  const initial = chain.charAt(0).toUpperCase();
+  
+  return (
+    <div className="flex items-center gap-1.5">
+      <div 
+        className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white"
+        style={{ background: color }}
+        title={chain}
+      >
+        {initial}
+      </div>
+      <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+        {chain}
+      </span>
+    </div>
+  );
+};
 
 interface TokenTableProps {
   tokens: TokenPosition[];
@@ -11,7 +48,7 @@ interface TokenTableProps {
 }
 
 export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll, onClearAll }: TokenTableProps) {
-  const [filter, setFilter] = useState<TokenClassification | 'all'>('all');
+  const [filter, setFilter] = useState<TokenClassification | 'all' | 'forgotten'>('all');
   const [assetClassFilter, setAssetClassFilter] = useState<'all' | 'core' | 'non_core'>('all');
 
   const explorerBaseByChain: Record<string, string> = {
@@ -36,32 +73,45 @@ export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll
     return base ? `${base}${contract}` : null;
   };
 
-  const counts = {
+  const isForgotten = (t: TokenPosition) =>
+    t.classification !== 'core' &&
+    t.balanceUsd > 1 &&
+    !!t.lastTransferredAt &&
+    isDormant(t.lastTransferredAt);
+
+  const counts: Record<string, number> = {
     all: tokens.length,
     core: tokens.filter(t => t.classification === 'core').length,
     recoverable: tokens.filter(t => t.classification === 'recoverable').length,
     dust: tokens.filter(t => t.classification === 'dust').length,
+    forgotten: tokens.filter(isForgotten).length,
     unsafe: tokens.filter(t => t.classification === 'unsafe').length,
   };
 
-  const filteredByClass = filter === 'all' ? tokens : tokens.filter(t => t.classification === filter);
+  const filteredByClass = (() => {
+    if (filter === 'all') return tokens;
+    if (filter === 'forgotten') return tokens.filter(isForgotten);
+    return tokens.filter(t => t.classification === filter);
+  })();
   const filtered = assetClassFilter === 'all'
     ? filteredByClass
     : filteredByClass.filter(t => (t.assetClass || 'non_core') === assetClassFilter);
 
-  const filters: { key: TokenClassification | 'all'; label: string }[] = [
+  const filters: { key: TokenClassification | 'all' | 'forgotten'; label: string }[] = [
     { key: 'all', label: 'All' },
     { key: 'core', label: 'Core' },
     { key: 'recoverable', label: 'Recoverable' },
     { key: 'dust', label: 'Dust' },
+    { key: 'forgotten', label: 'Forgotten' },
     { key: 'unsafe', label: 'Unsafe' },
   ];
 
-  const classificationHelp: Record<TokenClassification | 'all', string> = {
+  const classificationHelp: Record<TokenClassification | 'all' | 'forgotten', string> = {
     all: 'All tokens across classifications.',
     core: 'Core assets are strategic holdings and not auto-liquidated.',
     recoverable: 'Recoverable tokens are eligible for managed liquidation.',
     dust: 'Dust tokens are small balances that can be batched.',
+    forgotten: 'Dormant 12+ months with value over $1. Worth consolidating before they lose more value.',
     unsafe: 'Unsafe tokens are locked from action due to risk or low liquidity.',
   };
 
@@ -100,31 +150,22 @@ export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll
         </div>
       )}
 
-      <div className="flex flex-wrap gap-[6px] mb-[10px]">
-        {assetClassFilters.map(f => (
-          <button
-            key={f.key}
-            onClick={() => setAssetClassFilter(f.key)}
-            className="px-3 py-[5px] rounded-[6px] text-[11px] font-medium cursor-pointer transition-all duration-150 border"
-            style={{
-              border: `1px solid ${assetClassFilter === f.key ? 'var(--border-active)' : 'var(--border)'}`,
-              background: assetClassFilter === f.key ? 'var(--elevated)' : 'transparent',
-              color: assetClassFilter === f.key ? 'var(--text)' : 'var(--text-secondary)',
-            }}
-          >
-            <span className="inline-flex items-center gap-1">
-              {f.label}
-              <span
-                className="inline-flex items-center justify-center w-[14px] h-[14px] text-[10px] rounded-full"
-                style={{ background: 'var(--surface)', color: 'var(--text-tertiary)', border: '1px solid var(--border)' }}
-                title={f.help}
-              >
-                i
-              </span>
-            </span>
-          </button>
-        ))}
-      </div>
+      {filter === 'forgotten' && counts.forgotten > 0 && (
+        <div
+          className="rounded-[8px] p-4 mb-4 text-[12px] leading-[1.5]"
+          style={{
+            background: 'var(--elevated)',
+            border: '1px solid var(--accent)',
+          }}
+        >
+          <span style={{ color: 'var(--accent)' }}>
+            <strong>{counts.forgotten} forgotten positions</strong> found.
+          </span>{' '}
+          <span style={{ color: 'var(--text-secondary)' }}>
+            These tokens have been dormant for over a year and are worth consolidating before they lose more value.
+          </span>
+        </div>
+      )}
 
       <div className="flex gap-[6px] mb-[14px]">
         {filters.map(f => (
@@ -152,11 +193,12 @@ export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll
         ))}
       </div>
 
-      <div className="rounded-[10px] overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+      <div className="rounded-[10px] overflow-hidden overflow-x-auto" style={{ border: '1px solid var(--border)' }}>
         <div
           className="grid px-4 py-[10px] text-[9px] font-semibold tracking-[0.06em] uppercase"
           style={{
-            gridTemplateColumns: '28px 1fr 80px 90px 90px 90px',
+            gridTemplateColumns: '28px minmax(80px, 1fr) minmax(80px, 100px) minmax(80px, 100px) minmax(80px, 100px) minmax(80px, 100px)',
+            minWidth: '600px',
             background: 'var(--surface)',
             borderBottom: '1px solid var(--border)',
             color: 'var(--text-tertiary)',
@@ -215,7 +257,8 @@ export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll
               key={`${token.symbol}-${token.chain}-${i}`}
               className="grid px-4 py-[9px] text-[13px] items-center"
               style={{
-                gridTemplateColumns: '28px 1fr 80px 90px 90px 90px',
+                gridTemplateColumns: '28px minmax(80px, 1fr) minmax(80px, 100px) minmax(80px, 100px) minmax(80px, 100px) minmax(80px, 100px)',
+                minWidth: '600px',
                 background: i % 2 === 0 ? 'var(--bg)' : 'var(--surface)',
                 borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none',
               }}
@@ -269,7 +312,7 @@ export function TokenTable({ tokens, selectedIds, onToggleSelection, onSelectAll
                 </div>
               </div>
               <div className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
-                {token.chain}
+                <ChainIcon chain={token.chain} />
               </div>
               <div className="text-right font-mono text-[11px]" style={{ color: 'var(--text-secondary)' }}>
                 {token.balance}

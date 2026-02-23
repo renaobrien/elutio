@@ -20,7 +20,7 @@ export function Sidebar({ activeScreen, onNavigate }: SidebarProps) {
 
   return (
     <div
-      className="w-40 flex flex-col py-4"
+      className="w-40 hidden md:flex flex-col py-4"
       style={{
         borderRight: '1px solid var(--border)',
         background: 'var(--surface)',

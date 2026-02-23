@@ -12,9 +12,10 @@ interface TopbarProps {
   onOpenNotifications?: () => void;
   onDisconnectWallet?: () => void;
   onSwitchWallet?: () => void;
+  onGoHome?: () => void;
 }
 
-export function Topbar({ walletAddress, onConnectWallet, onOpenSettings, onOpenNotifications, onDisconnectWallet, onSwitchWallet }: TopbarProps) {
+export function Topbar({ walletAddress, onConnectWallet, onOpenSettings, onOpenNotifications, onDisconnectWallet, onSwitchWallet, onGoHome }: TopbarProps) {
   const { theme, toggleTheme } = useTheme();
   const [ensName, setEnsName] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -70,7 +71,9 @@ export function Topbar({ walletAddress, onConnectWallet, onOpenSettings, onOpenN
         background: 'var(--surface)',
       }}
     >
-      <Logo />
+      <button onClick={onGoHome} className="cursor-pointer hover:opacity-80 transition-opacity">
+        <Logo />
+      </button>
 
       <div className="flex items-center gap-4">
         {walletAddress ? (

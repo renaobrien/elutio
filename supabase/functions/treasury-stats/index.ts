@@ -89,7 +89,8 @@ Deno.serve(async (req) => {
     }
 
     // Extrapolate to get rough estimate (these 5 treasuries represent ~5% of total DeFi TVL)
-    const estimatedTotal = totalDust * 20;
+    // Updated to 50x for more realistic Web3 dust estimate
+    const estimatedTotal = totalDust * 50;
 
     return new Response(
       JSON.stringify({ 

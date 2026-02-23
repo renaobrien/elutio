@@ -42,10 +42,9 @@ function App() {
   };
 
   const handleViewExample = (address: string) => {
-    // Auto-scan the example wallet immediately
+    // Trigger actual wallet scan for example address
     setWalletAddress(address);
-    setScanId(`example-${Date.now()}`); // Temporary ID for demo
-    setScreen('overview');
+    setScreen('scanning');
   };
 
   const handleWalletConnect = (address: string) => {
@@ -154,6 +153,7 @@ function App() {
               walletAddress={walletAddress}
               onComplete={handleScanComplete}
               onWalletChange={setWalletAddress}
+              autoStart={true}
             />
           )}
 

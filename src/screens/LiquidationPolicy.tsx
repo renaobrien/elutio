@@ -19,19 +19,58 @@ export function LiquidationPolicy({ walletAddress, onNavigate, onSwitchWallet, o
         onOpenNotifications={() => onNavigate('alerts')}
         onSwitchWallet={onSwitchWallet}
         onDisconnectWallet={onDisconnect}
+        onGoHome={() => onNavigate('landing')}
       />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar activeScreen="faq" onNavigate={onNavigate} />
 
-        <div className="flex-1 p-7 pb-16 overflow-auto max-w-4xl">
-          <div className="mb-8">
-            <h1 className="text-[24px] font-serif mb-2" style={{ color: 'var(--text)' }}>
+        <div className="flex-1 p-4 md:p-7 pb-20 md:pb-16 overflow-y-auto">
+          <div className="mb-6 md:mb-8">
+            <h1 className="text-[20px] md:text-[24px] font-serif mb-1 md:mb-2" style={{ color: 'var(--text)' }}>
               FAQs
             </h1>
-            <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-[12px] md:text-[14px]" style={{ color: 'var(--text-secondary)' }}>
               Answers to common questions about how Elutio works
             </p>
+          </div>
+
+          {/* Trust & Safety */}
+          <div
+            className="rounded-[10px] p-6 mb-6"
+            style={{
+              background: 'var(--surface)',
+              border: '2px solid var(--accent)',
+            }}
+          >
+            <h2 className="text-[18px] font-semibold mb-4" style={{ color: 'var(--text)' }}>
+              Trust & Safety
+            </h2>
+            <div className="space-y-5 text-[14px]" style={{ color: 'var(--text-secondary)' }}>
+              <div>
+                <strong style={{ color: 'var(--text)' }}>Where and how are tokens liquidated?</strong>
+                <p className="mt-1">
+                  Tokens are batch-liquidated through established DEX infrastructure on each token's native chain.
+                  We validate liquidity depth before executing and enforce conservative slippage limits.
+                  Liquidation proceeds when batch thresholds are met.
+                </p>
+              </div>
+              <div>
+                <strong style={{ color: 'var(--text)' }}>How do you prevent front-running?</strong>
+                <p className="mt-1">
+                  We mitigate MEV through batched execution and undisclosed execution parameters.
+                  Trades are not per-user or on-demand — exact timing, composition, and routing are not published.
+                </p>
+              </div>
+              <div>
+                <strong style={{ color: 'var(--text)' }}>How is yield managed?</strong>
+                <p className="mt-1">
+                  All tokens are liquidated to USDC and deployed to stable yield strategies. You earn proportional
+                  to your share of the pool. Elutio takes a small percentage of yield generated, not your principal.
+                  Gas fees are sponsored by Elutio.
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Overview */}
@@ -212,7 +251,32 @@ export function LiquidationPolicy({ walletAddress, onNavigate, onSwitchWallet, o
             </h2>
             <div className="space-y-4 text-[14px]">
               <div>
-                <strong style={{ color: 'var(--text)' }}>What does “policy” mean here?</strong>
+                <strong style={{ color: 'var(--text)' }}>How does Elutio make money?</strong>
+                <p style={{ color: 'var(--text-secondary)' }}>
+                  We sponsor gas fees and take a small percentage of yield generated from the USDC pool.
+                  No deposit fees, no withdrawal fees, no cut of your principal. Our revenue comes only
+                  from a share of yield.
+                </p>
+              </div>
+              <div>
+                <strong style={{ color: 'var(--text)' }}>If my tokens are small, how does this work?</strong>
+                <p style={{ color: 'var(--text-secondary)' }}>
+                  Individually, small positions aren't worth the gas to sell. Aggregated across many users,
+                  those same tokens form meaningful liquidity that can be batch-liquidated efficiently.
+                  Only tokens that pass our viability scoring are accepted — we don't take on positions
+                  we can't liquidate.
+                </p>
+              </div>
+              <div>
+                <strong style={{ color: 'var(--text)' }}>Do I give up custody of my tokens?</strong>
+                <p style={{ color: 'var(--text-secondary)' }}>
+                  Yes. You deposit tokens into the Elutio pool. We batch-liquidate them into USDC and
+                  deploy to yield strategies. Think of it like depositing into a yield protocol — you
+                  earn proportional to your contribution.
+                </p>
+              </div>
+              <div>
+                <strong style={{ color: 'var(--text)' }}>What does "policy" mean here?</strong>
                 <p style={{ color: 'var(--text-secondary)' }}>
                   This refers to Elutio’s liquidation and custody policy, not governance or voting policy.
                   It describes how assets are handled and when liquidation can occur.

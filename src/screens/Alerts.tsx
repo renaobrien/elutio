@@ -28,17 +28,18 @@ export function Alerts({ walletAddress, onNavigate, onSwitchWallet, onDisconnect
         onOpenNotifications={() => onNavigate('alerts')}
         onSwitchWallet={onSwitchWallet}
         onDisconnectWallet={onDisconnect}
+        onGoHome={() => onNavigate('landing')}
       />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar activeScreen="alerts" onNavigate={onNavigate} />
 
-        <div className="flex-1 p-7 pb-16 overflow-auto">
-          <div className="mb-6">
-            <h1 className="text-[24px] font-serif mb-2" style={{ color: 'var(--text)' }}>
+        <div className="flex-1 p-4 md:p-7 pb-20 md:pb-16 overflow-y-auto">
+          <div className="mb-4 md:mb-6">
+            <h1 className="text-[20px] md:text-[24px] font-serif mb-1 md:mb-2" style={{ color: 'var(--text)' }}>
               Notifications
             </h1>
-            <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-[12px] md:text-[14px]" style={{ color: 'var(--text-secondary)' }}>
               Security and hygiene notifications for your treasury.
             </p>
           </div>

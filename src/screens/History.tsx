@@ -22,20 +22,22 @@ export function History({ walletAddress, onNavigate, onSwitchWallet, onDisconnec
         onOpenNotifications={() => onNavigate('alerts')}
         onSwitchWallet={onSwitchWallet}
         onDisconnectWallet={onDisconnect}
+        onGoHome={() => onNavigate('landing')}
       />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar activeScreen="history" onNavigate={onNavigate} />
 
-        <div className="flex-1 p-7 pb-16 overflow-auto">
-          <div className="mb-8">
-            <h1 className="text-[24px] font-serif mb-2" style={{ color: 'var(--text)' }}>
-              Payout History
-            </h1>
-            <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
-              Automatic payouts from your pool contributions.
-            </p>
-          </div>
+        <div className="flex-1 p-4 md:p-7 pb-20 md:pb-16 overflow-y-auto w-full">
+          <div className="w-full max-w-7xl mx-auto">
+            <div className="mb-6 md:mb-8">
+              <h1 className="text-[20px] md:text-[24px] font-serif mb-1 md:mb-2" style={{ color: 'var(--text)' }}>
+                Payout History
+              </h1>
+              <p className="text-[12px] md:text-[14px]" style={{ color: 'var(--text-secondary)' }}>
+                Automatic payouts from your pool contributions.
+              </p>
+            </div>
 
           {/* Payout History */}
           <div className="rounded-[10px] overflow-hidden mb-8" style={{ border: '1px solid var(--border)' }}>
@@ -231,6 +233,7 @@ export function History({ walletAddress, onNavigate, onSwitchWallet, onDisconnec
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
       </div>

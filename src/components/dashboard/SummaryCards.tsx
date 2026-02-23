@@ -6,11 +6,17 @@ import { WalletMetrics } from '../../types';
 
 interface SummaryCardsProps {
   metrics: WalletMetrics;
+  dustThreshold: number;
+  onDustThresholdChange: (value: number) => void;
 }
 
-export function SummaryCards({ metrics }: SummaryCardsProps) {
+export function SummaryCards({ metrics, dustThreshold, onDustThresholdChange }: SummaryCardsProps) {
   const [hoveredInfo, setHoveredInfo] = useState<string | null>(null);
-  const [dustThreshold, setDustThreshold] = useState<number>(10);
+  const dustUsd = metrics.dustUsd || 0;
+  const dustCount = metrics.positions.dust;
+  const recoverableUsd = metrics.recoverableUsd;
+  const recoverableCount = metrics.positions.recoverable;
+  
   const cards = [
     {
       label: 'TOTAL BALANCE',
@@ -23,39 +29,50 @@ export function SummaryCards({ metrics }: SummaryCardsProps) {
     },
     {
       label: 'TOTAL DUST',
-      value: metrics.dustUsd || 0,
-      sub: `${metrics.positions.dust} positions under $${dustThreshold}`,
+      value: dustUsd,
+      sub: `${dustCount} positions`,
       accent: true,
       prefix: '$',
       decimals: 2,
       info: null,
       selector: true,
       thresholdValue: dustThreshold,
-      onThresholdChange: setDustThreshold,
+      onThresholdChange: onDustThresholdChange,
     },
     {
       label: 'RECOVERABLE',
-      value: metrics.recoverableUsd,
-      sub: `${metrics.positions.recoverable} positions`,
+      value: recoverableUsd,
+      sub: (() => {
+        const pricedCount = recoverableCount - (metrics.recoverableUnpricedCount || 0);
+        if (recoverableUsd > 0 && metrics.recoverableUnpricedCount > 0) {
+          return `${pricedCount} priced + ${metrics.recoverableUnpricedCount} unpriced`;
+        }
+        if (recoverableUsd === 0 && metrics.recoverableUnpricedCount > 0) {
+          return `${metrics.recoverableUnpricedCount} unpriced positions`;
+        }
+        return `${recoverableCount} positions`;
+      })(),
       accent: false,
       prefix: '$',
       decimals: 2,
-      info: 'Assets eligible for pool deposit and yield generation.',
+      info: 'Recoverable principal includes non-core balances at or above the dust threshold. This is principal, not yield.',
     },
     {
       label: 'POTENTIAL EARNINGS',
-      value: Math.floor(metrics.recoverableUsd * 0.02),
-      sub: 'Estimated APY at 2% yield',
+      value: metrics.opportunityCostUsd,
+      sub: metrics.unpricedCount > 0
+        ? `Est. annual yield at 7% APY (includes $1 floor for ${metrics.unpricedCount} unpriced)`
+        : 'Estimated annual yield at 7% APY',
       accent: false,
       prefix: '$',
       decimals: 0,
-      info: 'Estimated annual earnings from pool deposits.',
+      info: 'Estimated yearly yield after consolidation at 7% APY. This is earnings, not principal to be claimed.',
     },
     {
       label: 'HYGIENE',
       custom: true,
       score: metrics.hygieneScore,
-      info: 'Portfolio health score. Higher is better.',
+      info: `${metrics.dormantCount} positions lost to entropy. ${metrics.unpricedCount} assets lack pricing data.`,
     },
   ];
 
@@ -90,7 +107,7 @@ export function SummaryCards({ metrics }: SummaryCardsProps) {
                 />
                 {hoveredInfo === card.label && (
                   <div
-                    className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 rounded-[4px] text-[10px] w-40 z-10 shadow-lg text-center"
+                    className="absolute bottom-full right-0 mb-2 p-2 rounded-[4px] text-[10px] w-48 z-10 shadow-lg"
                     style={{
                       background: 'var(--surface)',
                       border: '1px solid var(--border)',
@@ -120,8 +137,21 @@ export function SummaryCards({ metrics }: SummaryCardsProps) {
                 className="text-[22px] font-mono font-medium leading-[1.1] mb-1"
                 style={{ color: card.accent ? 'var(--accent)' : 'var(--text)' }}
               >
-                {card.prefix}
-                <CountUp end={card.value!} decimals={card.decimals || 0} />
+                {(card as any).valueDisplay !== undefined ? (
+                  // Show custom display (e.g., "57 Assets")
+                  <>
+                    {(card as any).valueDisplay}
+                    <span className="text-[14px] ml-1" style={{ color: 'var(--text-secondary)' }}>
+                      {(card as any).valueUnit}
+                    </span>
+                  </>
+                ) : (
+                  // Show default CountUp
+                  <>
+                    {card.prefix}
+                    <CountUp end={card.value!} decimals={card.decimals || 0} />
+                  </>
+                )}
               </div>
               {(card as any).selector ? (
                 <div className="flex items-center gap-2">
@@ -135,11 +165,11 @@ export function SummaryCards({ metrics }: SummaryCardsProps) {
                       color: 'var(--text-secondary)',
                     }}
                   >
-                    <option value={5}>$5</option>
-                    <option value={10}>$10</option>
-                    <option value={25}>$25</option>
-                    <option value={50}>$50</option>
-                    <option value={100}>$100</option>
+                    <option value={1000}>$1K</option>
+                    <option value={5000}>$5K</option>
+                    <option value={10000}>$10K</option>
+                    <option value={20000}>$20K</option>
+                    <option value={50000}>$50K</option>
                   </select>
                   <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
                     threshold

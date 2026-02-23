@@ -75,78 +75,80 @@ export function Earnings({ walletAddress, onNavigate, onSwitchWallet, onDisconne
         onOpenNotifications={() => onNavigate('alerts')}
         onSwitchWallet={onSwitchWallet}
         onDisconnectWallet={onDisconnect}
+        onGoHome={() => onNavigate('landing')}
       />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar activeScreen="pool" onNavigate={onNavigate} />
 
-        <div className="flex-1 p-7 pb-16 overflow-auto max-w-5xl">
-          <div className="mb-8">
-            <h1 className="text-[24px] font-serif mb-2" style={{ color: 'var(--text)' }}>
-              Earnings Dashboard
-            </h1>
-            <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
-              Track your pool deposits and earned yield across all networks
-            </p>
-          </div>
+        <div className="flex-1 p-4 md:p-7 pb-20 md:pb-16 overflow-y-auto w-full">
+          <div className="w-full max-w-7xl mx-auto">
+            <div className="mb-6 md:mb-8">
+              <h1 className="text-[20px] md:text-[24px] font-serif mb-1 md:mb-2" style={{ color: 'var(--text)' }}>
+                Earnings Dashboard
+              </h1>
+              <p className="text-[12px] md:text-[14px]" style={{ color: 'var(--text-secondary)' }}>
+                Track your pool deposits and earned yield across all networks
+              </p>
+            </div>
 
           {/* Summary Cards */}
-          <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
             <div
-              className="rounded-[10px] p-5"
+              className="rounded-[10px] p-3 md:p-5"
               style={{
                 background: 'var(--surface)',
                 border: '1px solid var(--border)',
               }}
             >
-              <div className="text-[12px] uppercase font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
-                <Wallet size={14} style={{ display: 'inline', marginRight: '4px' }} />
+              <div className="text-[10px] md:text-[12px] uppercase font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
+                <Wallet size={12} className="md:w-[14px] md:h-[14px] inline mr-1" />
                 Total Deposited
               </div>
-              <div className="text-[20px] font-semibold" style={{ color: 'var(--text)' }}>
+              <div className="text-[16px] md:text-[20px] font-semibold" style={{ color: 'var(--text)' }}>
                 ${totalDeposited.toLocaleString()}
               </div>
             </div>
 
             <div
-              className="rounded-[10px] p-5"
+              className="rounded-[10px] p-3 md:p-5"
               style={{
                 background: 'var(--surface)',
                 border: '1px solid var(--border)',
               }}
             >
-              <div className="text-[12px] uppercase font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
+              <div className="text-[10px] md:text-[12px] uppercase font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
                 Current Value
               </div>
-              <div className="text-[20px] font-semibold" style={{ color: 'var(--text)' }}>
+              <div className="text-[16px] md:text-[20px] font-semibold" style={{ color: 'var(--text)' }}>
                 ${totalCurrent.toLocaleString()}
               </div>
             </div>
 
             <div
-              className="rounded-[10px] p-5"
+              className="rounded-[10px] p-3 md:p-5"
               style={{
                 background: 'var(--surface)',
                 border: '1px solid var(--border)',
               }}
             >
-              <div className="text-[12px] uppercase font-semibold mb-2" style={{ color: 'var(--accent)' }}>
-                <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} />
+              <div className="text-[10px] md:text-[12px] uppercase font-semibold mb-2" style={{ color: 'var(--accent)' }}>
+                <TrendingUp size={12} className="md:w-[14px] md:h-[14px] inline mr-1" />
                 Yield Earned
               </div>
-              <div className="text-[20px] font-semibold" style={{ color: 'var(--accent)' }}>
+              <div className="text-[16px] md:text-[20px] font-semibold" style={{ color: 'var(--accent)' }}>
                 ${totalYield.toLocaleString()}
               </div>
             </div>
 
             <div
-              className="rounded-[10px] p-5"
+              className="rounded-[10px] p-3 md:p-5"
               style={{
                 background: 'var(--surface)',
                 border: '1px solid var(--border)',
               }}
             >
-              <div className="text-[12px] uppercase font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
+              <div className="text-[10px] md:text-[12px] uppercase font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
                 Average APY
               </div>
               <div className="text-[20px] font-semibold" style={{ color: 'var(--accent)' }}>
@@ -325,6 +327,7 @@ export function Earnings({ walletAddress, onNavigate, onSwitchWallet, onDisconne
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>

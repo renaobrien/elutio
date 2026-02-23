@@ -113,9 +113,10 @@ async function fetchTokenPrice(addr: string, chain: string) {
   try {
     const platform = CHAIN_CONFIG[chain].coingeckoPlatform;
     if (!platform) return 0;
-    const res = await fetch(`https://api.coingecko.com/api/v3/simple/token_price/${platform}?contract_addresses=${addr}&vs_currencies=usd`);
+    const normalized = addr.toLowerCase();
+    const res = await fetch(`https://api.coingecko.com/api/v3/simple/token_price/${platform}?contract_addresses=${normalized}&vs_currencies=usd`);
     const d = await res.json();
-    return d[addr.toLowerCase()]?.usd || 0;
+    return d[normalized]?.usd || 0;
   } catch {
     return 0;
   }
@@ -125,12 +126,13 @@ async function batchFetchTokenPrices(addresses: string[], chain: string) {
   try {
     const platform = CHAIN_CONFIG[chain].coingeckoPlatform;
     if (!platform) return {};
-    const csv = addresses.join(',');
+    const normalizedAddrs = addresses.map(a => a.toLowerCase());
+    const csv = normalizedAddrs.join(',');
     const res = await fetch(`https://api.coingecko.com/api/v3/simple/token_price/${platform}?contract_addresses=${csv}&vs_currencies=usd`);
     const data = await res.json();
     const prices: Record<string, number> = {};
-    addresses.forEach(addr => {
-      prices[addr.toLowerCase()] = data[addr.toLowerCase()]?.usd || 0;
+    normalizedAddrs.forEach(addr => {
+      prices[addr] = data[addr]?.usd || 0;
     });
     return prices;
   } catch {
@@ -363,12 +365,14 @@ Deno.serve(async (req) => {
           const metadataResults = await Promise.all(tokenPromises);
           const withMetadata = metadataResults.filter(r => r.data);
           
-          const addresses = withMetadata.map(r => r.addr);
+          const addresses = withMetadata.map(r => r.addr.toLowerCase());
           const prices = addresses.length > 0 ? await batchFetchTokenPrices(addresses, chain) : {};
           const hasPrices = Object.keys(prices).length > 0;
           console.log(`[${chain}] Price map keys: ${Object.keys(prices).length} / ${addresses.length}`);
+          console.log(`[${chain}] Sample addresses:`, addresses.slice(0, 3));
+          console.log(`[${chain}] Sample prices:`, Object.keys(prices).slice(0, 3));
 
-          const missingPriceAddrs = addresses.filter(addr => !prices[addr.toLowerCase()]);
+          const missingPriceAddrs = addresses.filter(addr => !prices[addr]);
           let dexPrices: Record<string, { priceUsd: number; liquidityUsd?: number }> = {};
           if (missingPriceAddrs.length > 0) {
             const chunks: string[][] = [];
@@ -378,6 +382,34 @@ Deno.serve(async (req) => {
             for (const chunk of chunks) {
               const chunkPrices = await fetchDexScreenerPrices(chunk);
               dexPrices = { ...dexPrices, ...chunkPrices };
+            }
+          }
+
+          // 3rd tier: asset registry fallback for tokens CoinGecko + DexScreener missed
+          const stillMissingAddrs = missingPriceAddrs.filter(addr => !dexPrices[addr]);
+          if (stillMissingAddrs.length > 0) {
+            console.log(`[${chain}] ${stillMissingAddrs.length} still unpriced, checking registry...`);
+            try {
+              const { data: registryData } = await supabase
+                .from('asset_registry')
+                .select('token_address, usd_price, liquidity_usd')
+                .eq('chain', chain)
+                .in('token_address', stillMissingAddrs)
+                .gt('usd_price', 0);
+              if (registryData) {
+                for (const asset of registryData) {
+                  const addr = asset.token_address?.toLowerCase();
+                  if (addr && asset.usd_price > 0) {
+                    dexPrices[addr] = {
+                      priceUsd: Number(asset.usd_price),
+                      liquidityUsd: Number(asset.liquidity_usd || 0),
+                    };
+                  }
+                }
+                console.log(`[${chain}] Registry priced ${registryData.length} tokens`);
+              }
+            } catch (err: any) {
+              console.error(`[${chain}] Registry fallback failed:`, err.message);
             }
           }
 

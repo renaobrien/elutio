@@ -6,6 +6,11 @@ export interface WalletMetrics {
   hygieneScore: number;
   opportunityCostUsd: number;
   alertCount: number;
+  recoverableUnpricedCount: number;
+  unpricedCount: number;
+  unpricedRecoverableCount: number;
+  unpricedDustCount: number;
+  dormantCount: number;
   positions: {
     core: number;
     recoverable: number;
@@ -26,6 +31,7 @@ export interface TokenPosition {
   liquidityUsd: number;
   contractAddress: string;
   assetClass?: AssetClass;
+  lastTransferredAt?: string;
 }
 
 export interface Token extends TokenPosition {

@@ -23,9 +23,10 @@ export function CountUp({ end, duration = 900, prefix = '', decimals = 0 }: Coun
     requestAnimationFrame(tick);
   }, [end, duration]);
 
-  const formatted = decimals > 0
-    ? value.toFixed(decimals)
-    : Math.floor(value).toLocaleString();
+  const formatted = value.toLocaleString('en-US', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
 
   return <span className="font-mono">{prefix}{formatted}</span>;
 }

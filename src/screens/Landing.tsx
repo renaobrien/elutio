@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sun, Moon, Wallet, X, ArrowLeft } from 'lucide-react';
+import { Sun, Moon, Wallet, X, ArrowLeft, Shield } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { Logo } from '../components/ui/Logo';
 import { Button } from '../components/ui/Button';
@@ -14,6 +14,7 @@ const EXAMPLE_WALLETS = [
   { address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37AA96045', label: 'Vitalik Buterin' },
   { address: '0x1f573d6b32cf0d1d2c90d2eb362f0394f47738e4', label: 'Bancor Treasury' },
   { address: '0xf977814e90da44bfa03b6295a0616a897441863a', label: 'Binance Wallet' },
+  { address: '0xde21f729137c5af1b01d73af1dc21effa2b8a0d6', label: 'Gitcoin Matching Pool' },
 ];
 
 export function Landing({ onConnectWallet, onViewExample }: LandingProps) {
@@ -70,23 +71,28 @@ export function Landing({ onConnectWallet, onViewExample }: LandingProps) {
             transform: visible ? 'translateY(0)' : 'translateY(10px)',
           }}
         >
-          <div className="mb-6 text-[48px] leading-[1.2] font-serif" style={{ color: 'var(--text)' }}>
-            There are
-            <br />
+          <div className="mb-4 text-[48px] leading-[1.2] font-serif" style={{ color: 'var(--text)' }}>
             <span className="font-mono" style={{ color: 'var(--accent)' }}>
               $<CountUp end={treasuryStats} duration={1200} />
             </span>
             <br />
-            in unusable assets in Web3 right now.
+            in recoverable value is sitting idle across Web3 wallets.
           </div>
 
-          <div className="mb-10 text-[14px] leading-[1.6]" style={{ color: 'var(--text-secondary)' }}>
-            Individually worthless. Collectively recoverable.
+          <div className="mb-3 text-[18px] font-serif" style={{ color: 'var(--text)' }}>
+            Turn forgotten tokens into real yield.
+          </div>
+
+          <div className="mb-8 text-[14px] leading-[1.6] max-w-lg mx-auto" style={{ color: 'var(--text-secondary)' }}>
+            Scan any wallet to find dust, dormant positions, and stranded value across 11 chains.
           </div>
 
           <Button variant="primary" onClick={() => setShowModal(true)} className="px-8 py-3 text-[14px]">
-            Try It Out
+            Scan Your Wallet
           </Button>
+          <div className="mt-2 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+            Read-only. No private keys needed.
+          </div>
         </div>
 
         <div
@@ -96,11 +102,61 @@ export function Landing({ onConnectWallet, onViewExample }: LandingProps) {
             transform: visible ? 'translateY(0)' : 'translateY(10px)',
           }}
         >
-          <div className="text-[14px] text-center" style={{ color: 'var(--text-secondary)' }}>
-            Scan Holdings <span style={{ color: 'var(--text-tertiary)' }}>•</span> Classify Recovery <span style={{ color: 'var(--text-tertiary)' }}>•</span> Allocate
+          <div className="flex items-center justify-center gap-3 md:gap-6 text-center max-w-xl mx-auto">
+            {[
+              { step: '1', title: 'Scan', desc: 'Read-only scan across 11 chains' },
+              { step: '2', title: 'Deposit', desc: 'Deposit qualifying tokens to the pool' },
+              { step: '3', title: 'Earn', desc: 'We batch-liquidate to USDC, you earn yield' },
+            ].map((item, idx) => (
+              <div key={idx} className="flex-1 flex flex-col items-center">
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-semibold mb-2"
+                  style={{ background: 'var(--accent)', color: '#fff' }}
+                >
+                  {item.step}
+                </div>
+                <div className="text-[13px] font-medium mb-1" style={{ color: 'var(--text)' }}>
+                  {item.title}
+                </div>
+                <div className="text-[11px] leading-[1.4]" style={{ color: 'var(--text-tertiary)' }}>
+                  {item.desc}
+                </div>
+              </div>
+            ))}
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3 max-w-3xl mx-auto">
+          <div
+            className="mt-8 max-w-xl mx-auto rounded-[10px] p-5"
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+          >
+            <div className="text-[12px] font-semibold mb-3" style={{ color: 'var(--text)' }}>
+              How we protect your assets
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+              <div className="flex gap-2">
+                <Shield size={14} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }} />
+                <span>Batched execution mitigates MEV exposure</span>
+              </div>
+              <div className="flex gap-2">
+                <Shield size={14} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }} />
+                <span>Conservative slippage and liquidity validation on all trades</span>
+              </div>
+              <div className="flex gap-2">
+                <Shield size={14} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }} />
+                <span>Only score-qualified tokens accepted into the pool</span>
+              </div>
+              <div className="flex gap-2">
+                <Shield size={14} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }} />
+                <span>Gas sponsored by Elutio — we take a small % of yield</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 text-center text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+            Elutio sponsors gas fees and takes a small percentage of yield. You keep the rest.
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 max-w-3xl mx-auto">
             <div className="text-[11px] uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
               Supported chains:
             </div>
@@ -196,7 +252,7 @@ export function Landing({ onConnectWallet, onViewExample }: LandingProps) {
 
               {/* View Address */}
               <div>
-                <label className="block text-[12px] font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>View Address</label>
+                <label className="block text-[12px] font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Preview any wallet (read-only)</label>
                 <input
                   type="text"
                   placeholder="Enter wallet address"
