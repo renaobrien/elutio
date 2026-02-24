@@ -476,7 +476,7 @@ Deno.serve(async (req) => {
 
     console.log(`Scan complete: ${processedTokens.length} tokens, $${totalBalanceUsd} total, $${positionsUsd} positions`);
 
-    const { data: scan, error: scanError } = await supabase.from('wallet_scans').insert({ wallet_address: walletAddress, total_balance_usd: totalBalanceUsd, positions_usd: positionsUsd, hygiene_score: hygieneScore, alert_count: 0 }).select().single();
+    const { data: scan, error: scanError } = await supabase.from('wallet_scans').insert({ wallet_address: walletAddress, total_balance_usd: totalBalanceUsd, recoverable_usd: positionsUsd, hygiene_score: hygieneScore, alert_count: 0 }).select().single();
 
     if (scanError) throw scanError;
 

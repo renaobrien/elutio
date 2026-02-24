@@ -34,16 +34,16 @@ export function Deposit({ walletAddress, onNavigate, onSwitchWallet, onDisconnec
     }));
   }, [dbTokens]);
 
-  // Filter to positions + dust tokens only
+  // Filter to positions + dust tokens only (handle both old 'recoverable' and new 'positions' classifications)
   const depositableTokens = tokens.filter(t => 
-    t.classification === 'positions' || t.classification === 'dust'
+    t.classification === 'positions' || t.classification === 'recoverable' || t.classification === 'dust'
   );
 
   const [selectedIds, setSelectedIds] = useState<Set<number>>(() => {
     return new Set(
       depositableTokens
         .map((token, i) => ({ token, i }))
-        .filter(({ token }) => token.classification === 'positions' || token.classification === 'dust')
+        .filter(({ token }) => token.classification === 'positions' || token.classification === 'recoverable' || token.classification === 'dust')
         .map(({ i }) => i)
     );
   });

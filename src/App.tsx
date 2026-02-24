@@ -32,6 +32,7 @@ function App() {
   const [tokens, setTokens] = useState<DBToken[]>([]);
   const [scan, setScan] = useState<WalletScan | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleStartScan = () => {
     setScreen('connect');
@@ -60,16 +61,19 @@ function App() {
   useEffect(() => {
     if (!scanId) return;
     setLoading(true);
+    setError(null);
     Promise.all([
       getTokensByScanId(scanId),
       getScanById(scanId)
     ])
       .then(([tokensData, scanData]) => {
+        console.log(`Loaded ${tokensData.length} tokens for scan ${scanId}`);
         setTokens(tokensData);
         setScan(scanData);
       })
       .catch(err => {
         console.error('Failed to load scan data:', err);
+        setError(err.message || 'Failed to load scan data');
       })
       .finally(() => {
         setLoading(false);
@@ -158,15 +162,34 @@ function App() {
           )}
 
           {screen === 'overview' && (
-            <Overview
-              walletAddress={walletAddress}
-              onNavigate={handleNavigate}
-              onSwitchWallet={handleSwitchWallet}
-              onDisconnect={handleDisconnect}
-              tokens={tokens}
-              scan={scan}
-              loading={loading}
-            />
+            error ? (
+              <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
+                <div className="text-center">
+                  <div style={{ color: 'var(--text)', fontSize: '18px', marginBottom: '10px' }}>Error Loading Wallet Data</div>
+                  <div style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>{error}</div>
+                  <button onClick={() => window.location.reload()} style={{ 
+                    background: 'var(--accent)', 
+                    color: 'var(--accent-text-on)',
+                    border: 'none',
+                    padding: '10px 20px',
+                    borderRadius: '6px',
+                    cursor: 'pointer'
+                  }}>
+                    Retry
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <Overview
+                walletAddress={walletAddress}
+                onNavigate={handleNavigate}
+                onSwitchWallet={handleSwitchWallet}
+                onDisconnect={handleDisconnect}
+                tokens={tokens}
+                scan={scan}
+                loading={loading}
+              />
+            )
           )}
 
           {screen === 'deposit' && (

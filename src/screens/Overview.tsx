@@ -59,6 +59,12 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
         };
       }
 
+      // Handle legacy 'recoverable' classification by keeping it for now
+      // (unpriced tokens: preserve original backend classification)
+      if (token.classification === 'recoverable') {
+        return token;
+      }
+
       // Unpriced tokens: preserve original backend classification
       // (can't apply threshold without a price)
       return token;
@@ -165,7 +171,7 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
       new Set(
         thresholdedTokens
           .map((token, i) => ({ token, i }))
-          .filter(({ token }) => token.classification === 'positions' || token.classification === 'dust')
+          .filter(({ token }) => token.classification === 'positions' || token.classification === 'recoverable' || token.classification === 'dust')
           .map(({ i }) => i)
       )
     );
@@ -197,7 +203,7 @@ export function Overview({ walletAddress, onNavigate, onSwitchWallet, onDisconne
 
   const selectedTokens = Array.from(selectedIds)
     .map(i => thresholdedTokens[i])
-    .filter(token => token && (token.classification === 'positions' || token.classification === 'dust'));
+    .filter(token => token && (token.classification === 'positions' || token.classification === 'recoverable' || token.classification === 'dust'));
 
   const selectedValue = selectedTokens.reduce((sum, token) => sum + token.balanceUsd, 0);
 
