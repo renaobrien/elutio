@@ -40,10 +40,10 @@ const classifyToken = (usd: number, sym: string, name?: string, priceKnown = tru
   if (isLikelyUnsafe(sym, name)) return 'unsafe';
   if (typeof liquidityUsd === 'number' && priceKnown && liquidityUsd > 0 && liquidityUsd < 1000) return 'unsafe';
   if (CORE_SYMBOLS.includes(sym)) return 'core';
-  if (!priceKnown) return 'recoverable';
+  if (!priceKnown) return 'positions';
   if (usd >= 1000) return 'core';
   if (usd < 10) return 'dust';
-  return 'recoverable';
+  return 'positions';
 };
 
 async function fetchDexScreenerPrices(addresses: string[]) {
@@ -467,16 +467,16 @@ Deno.serve(async (req) => {
       return sum + (isNaN(val) ? 0 : val);
     }, 0);
     
-    const recoverableUsd = processedTokens.filter(t => t.classification === 'recoverable' || t.classification === 'dust').reduce((sum, t) => {
+    const positionsUsd = processedTokens.filter(t => t.classification === 'positions' || t.classification === 'dust').reduce((sum, t) => {
       const val = parseFloat(t.balance_usd);
       return sum + (isNaN(val) ? 0 : val);
     }, 0);
     
     const hygieneScore = calcScore(processedTokens);
 
-    console.log(`Scan complete: ${processedTokens.length} tokens, $${totalBalanceUsd} total, $${recoverableUsd} recoverable`);
+    console.log(`Scan complete: ${processedTokens.length} tokens, $${totalBalanceUsd} total, $${positionsUsd} positions`);
 
-    const { data: scan, error: scanError } = await supabase.from('wallet_scans').insert({ wallet_address: walletAddress, total_balance_usd: totalBalanceUsd, recoverable_usd: recoverableUsd, hygiene_score: hygieneScore, alert_count: 0 }).select().single();
+    const { data: scan, error: scanError } = await supabase.from('wallet_scans').insert({ wallet_address: walletAddress, total_balance_usd: totalBalanceUsd, positions_usd: positionsUsd, hygiene_score: hygieneScore, alert_count: 0 }).select().single();
 
     if (scanError) throw scanError;
 
@@ -489,7 +489,7 @@ Deno.serve(async (req) => {
       if (tokensError) throw tokensError;
     }
 
-    return new Response(JSON.stringify({ success: true, scanId: scan.id, metrics: { totalBalanceUsd, recoverableUsd, hygieneScore, tokensCount: processedTokens.length } }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ success: true, scanId: scan.id, metrics: { totalBalanceUsd, positionsUsd, hygieneScore, tokensCount: processedTokens.length } }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error: any) {
     console.error('Error:', error);
