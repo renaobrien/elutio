@@ -28,7 +28,8 @@ const pillStyles: Record<TokenClassification, { label: string; className: string
 };
 
 export function Pill({ classification }: PillProps) {
-  const { label, className, help } = pillStyles[classification];
+  const resolved = classification in pillStyles ? classification : 'positions';
+  const { label, className, help } = pillStyles[resolved as TokenClassification];
 
   return (
     <span

@@ -2,12 +2,12 @@
 -- CORE: Never auto-liquidated (stables, WETH, WBTC, major L1s, LSTs)
 -- NON-CORE: Eligible for managed liquidation (DeFi governance, airdrops, etc.)
 
-ALTER TABLE asset_registry 
-ADD COLUMN asset_class TEXT DEFAULT 'non_core' CHECK (asset_class IN ('core', 'non_core'));
+ALTER TABLE asset_registry
+ADD COLUMN IF NOT EXISTS asset_class TEXT DEFAULT 'non_core' CHECK (asset_class IN ('core', 'non_core'));
 
 -- Add decimals column for token metadata
-ALTER TABLE asset_registry 
-ADD COLUMN decimals INTEGER DEFAULT 18;
+ALTER TABLE asset_registry
+ADD COLUMN IF NOT EXISTS decimals INTEGER DEFAULT 18;
 
 -- Update existing records to CORE classification
 UPDATE asset_registry 
